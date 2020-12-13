@@ -1,0 +1,46 @@
+#!/bin/sh
+
+prog=$(basename $0)
+die(){
+    echo "$prog: $1"
+    exit 1
+}
+
+
+get_output(){
+    external=$(xrandr | grep ' connected' | grep -v 'primary' \
+		   | sed -e 's/^\(.\+\) connected .*/\1/' | tail -1)
+}
+
+get_max_size_of_output(){
+    xrandr | grep -A 1 $external | tail -1 | sed -e 's/ *\([0-9]\+x[0-9]\+\) *.*/\1/'
+}
+
+
+get_primary_output(){
+    xrandr | grep 'primary' | cut -d' ' -f 1
+}
+
+
+exec_xrandr(){
+    xrandr --output $external --off
+    xrandr --output $external $* || xrandr --output $external --auto
+    xset b off  # off beep
+}
+
+
+[ -z "$1" ] && die 'needs one or more arguments'
+
+get_output
+[ -z "$external" ] && die "any display doesn't seem to be connected"
+
+args=''
+for arg in $*; do
+    case $arg in
+	_max) arg="--mode $(get_max_size_of_output)" ;;
+	_primary) arg=$(get_primary_output) ;;
+    esac
+    args="$args $arg"
+done
+
+exec_xrandr $args
