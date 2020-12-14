@@ -12,7 +12,7 @@ get_external_output(){
 		   | sed -e 's/^\(.\+\) connected .*/\1/' | tail -1)
 }
 
-get_max_size_of_output(){
+get_max_size_of_external_output(){
     xrandr | grep -A 1 $external | tail -1 | sed -e 's/ *\([0-9]\+x[0-9]\+\) *.*/\1/'
 }
 
@@ -37,7 +37,7 @@ get_external_output
 args=''
 for arg in $*; do
     case $arg in
-	_max) arg="--mode $(get_max_size_of_output)" ;;
+	_max) arg="--mode $(get_max_size_of_external_output)" ;;
 	_primary) arg=$(get_primary_output) ;;
     esac
     args="$args $arg"
